@@ -1,6 +1,6 @@
 import axios from "axios"
-import { ElNotification } from 'element-plus'
-import {useCookies} from '@vueuse/integrations/useCookies'
+import {getToken} from '~/composables/auth'
+import {toast} from '~/composables/util'
 
 
 const server = axios.create({
@@ -10,8 +10,7 @@ const server = axios.create({
 // 添加请求拦截器
 server.interceptors.request.use(function (config) {
   // 往header头自动添加token
-  const cookie = useCookies();
-  const token = cookie.get("admin-token")
+  const token = getToken()
   if (token) {
     config.headers["token"] = token;
    }
@@ -29,11 +28,7 @@ server.interceptors.response.use(function (response) {
 }, function (error) {
   // 超出 2xx 范围的状态码都会触发该函数。
   // 对响应错误做点什么
-  ElNotification({
-    message: error.response.data.msg || "请求失败",
-    type: 'error',
-    duration:3000
-    })
+  toast(error.response.data.msg, "error")
   return Promise.reject(error);
 });
 export default server

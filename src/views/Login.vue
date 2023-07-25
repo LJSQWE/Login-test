@@ -44,12 +44,12 @@
 <script setup >
 import {ref, reactive } from 'vue'
 import { Calendar, User, Lock} from '@element-plus/icons-vue'
-import { login, getInfo } from "~/api"
+import { login  } from "~/api"
 import { ElNotification } from 'element-plus'
 import { useRouter } from 'vue-router'
-import {useCookies} from '@vueuse/integrations/useCookies'
+import {setToken} from '~/composables/auth'
+import {toast} from '~/composables/util'
 
-const cookie = useCookies();
 const formRef =ref(null)
 const router = useRouter()
 const loading = ref(false);//防止用户因为登录响应慢，从而快速点击登录。默认让他为false
@@ -77,25 +77,20 @@ const onSubmit = () => {
       loading.value = true    //我们验证登录之后,请求之前来让loading = true
       login(form.username, form.password)
       .then(res =>{
-        console.log(res);
+        if(res.username === form.username && res.password === form.password){
+           console.log(res);
         //提示成功
-        ElNotification({
-        message:"登录成功",
-        type: 'success',
-        duration:2000
-        })
+        toast("登录成功")
         //存储token
-         cookie.set("admin-token",res.token)
-
+         setToken(res.token)
         //用户名相关信息
-        getInfo().then(res2 => {
-          console.log(res2);
-        })
-
+          
         //跳转到后台
         router.push("/")
-      })
-      .catch(err => {
+        } else {
+          toast("用户名或者密码错误" , 'error')
+        }
+      }).catch(err => {
 
       }).finally(() =>{
         loading.value = false;//不管成功或者失败都要false

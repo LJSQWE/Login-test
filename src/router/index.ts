@@ -1,5 +1,6 @@
 import {createRouter,createWebHashHistory} from "vue-router"
-
+import {getToken} from '~/composables/auth'
+import {toast} from '~/composables/util'
 
 const routes = [
   {
@@ -9,7 +10,16 @@ const routes = [
   },{
     path: '/login',
     name: 'Login',
-    component: () => import ('../views/Login.vue')
+    component: () => import ('../views/Login.vue'),
+    beforeEnter (to, from, next) {
+      const token = getToken();
+      if(token)  {
+        next({ name: 'Home' })
+        toast("你已登录请不要重复登陆", 'warning')
+      } else{
+        next()
+      } 
+    }
   }
 ]
 
@@ -18,15 +28,12 @@ const routes = [
   routes
 })
 
-//登录的路由守卫
-// router.beforeEach((to, from, next) => {
-//   const isLogin = ture;
-//   //关于下面的问题，就是isLogin要是登录了他还是跳到Login那个界面所以要加一个to.name === "Login"
-//   if (isLogin || to.name === "Login") {
-//     next()
-//   }else{
-//     next({name: "Login"})
-//   }
-// })
+// 登录的路由守卫
+router.beforeEach((to, from, next) => {
+  const token = getToken();
+  const { name } = to
+  const isLoginOrRegister = (name === 'Login' );
+  (token || isLoginOrRegister) ? next() : next({ name: 'Login' })
+})
 
 export default router

@@ -12,7 +12,7 @@ export default defineConfig({
   server: {
     proxy:{
       '/api': {
-        target: 'http://ceshi13.dishait.cn',
+        target: 'https://www.fastmock.site/mock/8eb7e7f0132d9cf1a2d2adda920a84cd/api',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
